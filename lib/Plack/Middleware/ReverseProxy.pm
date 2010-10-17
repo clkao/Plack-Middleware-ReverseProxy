@@ -24,8 +24,8 @@ sub call {
         $env->{REMOTE_ADDR} = $ip;
     }
 
-    if ( $env->{HTTP_X_FORWARDED_HOST} ) {
-        my ( $host, ) = $env->{HTTP_X_FORWARDED_HOST} =~ /([^,\s]+)$/;
+    if ( $env->{HTTP_X_FORWARDED_SERVER} ) {
+        my ( $host, ) = $env->{HTTP_X_FORWARDED_SERVER} =~ /([^,\s]+)$/;
         if ( $host =~ /^(.+):(\d+)$/ ) {
 #            $host = $1;
             $env->{SERVER_PORT} = $2;
@@ -33,11 +33,11 @@ sub call {
             # in apache httpd.conf (RequestHeader set X-Forwarded-Port 8443)
             $env->{SERVER_PORT} = $env->{HTTP_X_FORWARDED_PORT};
             $host .= ":$env->{SERVER_PORT}";
-            $env->{'psgi.url_scheme'} = 'https'
-                if $env->{SERVER_PORT} == 443;
         } else {
             $env->{SERVER_PORT} = $default_port;
         }
+        $env->{'psgi.url_scheme'} = 'https'
+            if $env->{SERVER_PORT} == 443;
         $env->{HTTP_HOST} = $host;
 
     } elsif ( $env->{HTTP_HOST} ) {
